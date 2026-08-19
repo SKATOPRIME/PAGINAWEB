@@ -3,784 +3,4386 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>La Web, a medida que crecía</title>
-<!-- Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Fonts spanning the eras: a period serif for 1.0, a friendly rounded sans for 2.0, a clean modern grotesk for 3.0, a technical mono/display pairing for 4.0 -->
+
+<!-- Font Awesome -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Fuentes -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Georgia&family=Verdana&family=Comic+Neue:wght@400;700&family=Trebuchet+MS&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet">
+
 
 <style>
+
 /* ============================================================
-   ROOT / GLOBAL — the timeline of the page itself
-   Each era owns a block of custom properties. We do NOT swap
-   these with JS; instead each <section> declares its own era
-   tokens locally, so the shift always tracks scroll position
-   exactly, with no lag or jump.
+   VARIABLES GLOBALES
    ============================================================ */
+
 :root{
-  --progress-color: #3b82f6;
+    --blue:#000080;
+    --web2-blue:#1557c0;
+    --web3-blue:#174ea6;
+    --cyan:#7ef7ff;
 }
 
-*{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; }
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
 body{
-  margin:0;
-  padding:0;
-  /* The master background: one tall gradient the whole page sits on,
-     so the colour itself evolves continuously as you scroll — no section
-     "cuts", just drift, like sediment layers. */
-  background:linear-gradient(
-    to bottom,
-    #ffffff 0%,
-    #f4f4f0 12%,
-    #eef1fb 22%,
-    #dbe4ff 30%,
-    #ffe3ef 38%,
-    #fff2d6 46%,
-    #f4f6fb 54%,
-    #eef0f4 60%,
-    #0f1220 72%,
-    #0a0e1a 80%,
-    #05060d 100%
-  );
-  color:#111;
-  overflow-x:hidden;
+    margin:0;
+    overflow-x:hidden;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #ffffff 0%,
+            #f4f4f0 12%,
+            #eef1fb 22%,
+            #dbe4ff 30%,
+            #ffe3ef 38%,
+            #fff2d6 46%,
+            #f4f6fb 54%,
+            #eef0f4 60%,
+            #101321 72%,
+            #0a0e1a 82%,
+            #05060d 100%
+        );
+
+    color:#111;
 }
 
-img{ max-width:100%; display:block; }
+img{
+    max-width:100%;
+    display:block;
+}
 
-/* ---------- Scroll progress bar ---------- */
+a{
+    transition:
+        color .2s ease,
+        background .2s ease,
+        opacity .2s ease;
+}
+
+
+/* ============================================================
+   BARRA DE PROGRESO
+   ============================================================ */
+
 #progress-bar{
-  position:fixed;
-  top:0; left:0;
-  height:4px;
-  width:0%;
-  background:linear-gradient(90deg,#555,#e91e63,#00bcd4,#00ffc8);
-  z-index:9999;
-  transition:width 0.08s linear;
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:0%;
+    height:4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #555,
+            #e91e63,
+            #00bcd4,
+            #00ffc8
+        );
+
+    z-index:99999;
 }
 
-/* ---------- Side era navigator ---------- */
+
+/* ============================================================
+   NAVEGACIÓN LATERAL
+   ============================================================ */
+
 #era-nav{
-  position:fixed;
-  right:18px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:9998;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+    position:fixed;
+
+    right:18px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    z-index:9998;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:18px;
 }
+
 #era-nav button{
-  width:14px; height:14px;
-  border-radius:50%;
-  border:2px solid rgba(120,120,120,0.5);
-  background:transparent;
-  cursor:pointer;
-  padding:0;
-  position:relative;
-  transition:all .3s ease;
+    width:14px;
+    height:14px;
+
+    padding:0;
+
+    border-radius:50%;
+    border:2px solid rgba(120,120,120,.5);
+
+    background:transparent;
+
+    cursor:pointer;
+
+    position:relative;
+
+    transition:.3s ease;
 }
+
 #era-nav button::after{
-  content:attr(data-label);
-  position:absolute;
-  right:24px;
-  top:50%;
-  transform:translateY(-50%);
-  white-space:nowrap;
-  font-family:'Inter',sans-serif;
-  font-size:11px;
-  letter-spacing:0.04em;
-  opacity:0;
-  transition:opacity .25s ease;
-  background:rgba(20,20,20,0.85);
-  color:#fff;
-  padding:3px 8px;
-  border-radius:4px;
-  pointer-events:none;
+    content:attr(data-label);
+
+    position:absolute;
+
+    right:24px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    white-space:nowrap;
+
+    padding:5px 9px;
+
+    border-radius:4px;
+
+    background:rgba(15,15,20,.9);
+    color:white;
+
+    font-family:Inter,sans-serif;
+    font-size:11px;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s ease;
 }
-#era-nav button:hover::after{ opacity:1; }
+
+#era-nav button:hover::after{
+    opacity:1;
+}
+
 #era-nav button.active{
-  background:var(--progress-color);
-  border-color:var(--progress-color);
-  box-shadow:0 0 0 4px rgba(59,130,246,0.15);
+    background:#2563eb;
+    border-color:#2563eb;
+
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,.15);
 }
 
-/* ---------- Reveal-on-scroll base state ---------- */
+
+/* ============================================================
+   INTRODUCCIÓN
+   ============================================================ */
+
+.main-intro{
+    min-height:80vh;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    padding:100px 25px 80px;
+
+    text-align:center;
+
+    font-family:Inter,sans-serif;
+}
+
+.intro-eyebrow{
+    margin-bottom:20px;
+
+    color:#555;
+
+    font-size:11px;
+    font-weight:700;
+
+    letter-spacing:.22em;
+}
+
+.main-intro h1{
+    max-width:900px;
+
+    margin:0;
+
+    font-size:clamp(3rem,8vw,7rem);
+
+    line-height:.95;
+    letter-spacing:-.065em;
+
+    font-weight:800;
+}
+
+.main-intro p{
+    max-width:680px;
+
+    margin:25px auto 0;
+
+    color:#4b5563;
+
+    font-size:16px;
+    line-height:1.8;
+}
+
+.intro-scroll{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    gap:12px;
+
+    margin-top:45px;
+
+    color:#777;
+
+    font-size:11px;
+
+    letter-spacing:.1em;
+
+    text-transform:uppercase;
+}
+
+.intro-scroll i{
+    font-size:18px;
+
+    animation:introArrow 1.8s ease-in-out infinite;
+}
+
+@keyframes introArrow{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(8px);
+    }
+
+}
+
+
+/* ============================================================
+   ANIMACIONES REVEAL
+   ============================================================ */
+
 .reveal{
-  opacity:0;
-  transform:translateY(24px);
-  transition:opacity .7s ease, transform .7s ease;
+    opacity:0;
+
+    transform:translateY(28px);
+
+    transition:
+        opacity .7s ease,
+        transform .7s ease;
 }
+
 .reveal.visible{
-  opacity:1;
-  transform:translateY(0);
+    opacity:1;
+
+    transform:translateY(0);
 }
 
-/* Era banner shared skeleton */
+
+/* ============================================================
+   ESTRUCTURA GENERAL DE ERAS
+   ============================================================ */
+
 .era-banner{
-  text-align:center;
-  padding:70px 20px 40px;
+    text-align:center;
+
+    padding:90px 20px 50px;
 }
+
 .era-banner .era-kicker{
-  display:inline-block;
-  font-size:13px;
-  letter-spacing:0.14em;
-  padding:6px 14px;
-  border-radius:999px;
-  margin-bottom:14px;
-}
-.era-banner h1{ margin:0 0 8px; }
-.era-banner p.era-sub{ margin:0; opacity:.75; }
+    display:inline-block;
 
-/* Generic timeline skeleton (structure reused, styled per era) */
+    margin-bottom:16px;
+
+    padding:7px 15px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    letter-spacing:.12em;
+}
+
+.era-banner h1{
+    margin:0 0 12px;
+}
+
+.era-banner .era-sub{
+    max-width:700px;
+
+    margin:0 auto;
+
+    line-height:1.7;
+}
+
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+
 .timeline{
-  max-width:900px;
-  margin:0 auto;
-  padding:20px 20px 80px;
-  position:relative;
+    max-width:920px;
+
+    margin:0 auto;
+
+    padding:20px 20px 90px;
+
+    position:relative;
 }
+
 .timeline::before{
-  content:'';
-  position:absolute;
-  left:50%;
-  top:0; bottom:0;
-  width:2px;
-  transform:translateX(-50%);
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+    top:0;
+    bottom:0;
+
+    width:2px;
+
+    transform:translateX(-50%);
 }
+
 .event{
-  position:relative;
-  width:50%;
-  padding:0 40px 46px;
+    position:relative;
+
+    width:50%;
+
+    padding:0 40px 50px;
 }
-.event:nth-child(odd){ left:0; text-align:right; }
-.event:nth-child(even){ left:50%; text-align:left; }
+
+.event:nth-child(odd){
+    left:0;
+
+    text-align:right;
+}
+
+.event:nth-child(even){
+    left:50%;
+
+    text-align:left;
+}
+
 .event .dot{
-  position:absolute;
-  top:4px;
-  width:14px; height:14px;
-  border-radius:50%;
+    position:absolute;
+
+    top:4px;
+
+    width:14px;
+    height:14px;
 }
-.event:nth-child(odd) .dot{ right:-7px; }
-.event:nth-child(even) .dot{ left:-7px; }
-.event .year{ font-weight:700; display:block; margin-bottom:4px; }
+
+.event:nth-child(odd) .dot{
+    right:-7px;
+}
+
+.event:nth-child(even) .dot{
+    left:-7px;
+}
+
+.event .year{
+    display:block;
+
+    margin-bottom:6px;
+
+    font-weight:700;
+}
+
 .event .card{
-  display:inline-block;
-  text-align:left;
-  max-width:100%;
-  transition:transform .3s ease, box-shadow .3s ease;
+    display:inline-block;
+
+    max-width:100%;
+
+    text-align:left;
 }
 
-/* Examples row skeleton */
+
+/* ============================================================
+   EJEMPLOS
+   ============================================================ */
+
 .examples{
-  max-width:1000px;
-  margin:0 auto;
-  padding:10px 20px 90px;
+    max-width:1000px;
+
+    margin:0 auto;
+
+    padding:10px 20px 100px;
 }
-.examples h2{ text-align:center; margin-bottom:34px; }
+
+.examples h2{
+    text-align:center;
+
+    margin-bottom:35px;
+}
+
 .example-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
-  gap:20px;
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fit,minmax(210px,1fr));
+
+    gap:20px;
 }
+
 .example-card{
-  padding:20px;
-  transition:transform .3s ease, box-shadow .3s ease;
+    padding:22px;
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
 }
-.example-card:hover{ transform:translateY(-6px); }
-.example-card .creator{
-  display:block;
-  font-size:12.5px;
-  opacity:.7;
-  margin-top:6px;
+
+.example-card:hover{
+    transform:translateY(-6px);
 }
-/* Make entire example-card clickable if it contains an anchor */
+
 .example-card a{
-  display:block;
-  text-decoration:none;
-  color:inherit;
+    display:block;
+
+    color:inherit;
+
+    text-decoration:none;
 }
 
-/* Mobile: collapse timeline to one column */
-@media (max-width:720px){
-  .timeline::before{ left:18px; }
-  .event{ width:100%; left:0 !important; padding:0 0 34px 46px !important; text-align:left !important; }
-  .event .dot{ left:11px !important; right:auto !important; }
-  #era-nav{ right:8px; }
-  #era-nav button::after{ display:none; }
+.example-card .creator{
+    display:block;
+
+    margin-top:7px;
+
+    font-size:12px;
 }
+
 
 /* ============================================================
-   SECTION 1 — WEB 1.0 (1991–2003): the static, hand-coded web
-   Times New Roman, blue underlined links, table borders,
-   grey/white, a blinking marquee-era wink, no rounded corners.
+   WEB 1.0
    ============================================================ */
+
 #web1{
-  font-family:"Times New Roman", Georgia, serif;
-  background:transparent;
-  color:#101010;
-  border-bottom:4px double #999;
+    font-family:
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    color:#101010;
+
+    border-bottom:4px double #999;
 }
-#web1 .era-kicker{ background:#c0c0c0; color:#000; border:1px solid #808080; font-family:Georgia,serif; letter-spacing:0; }
-#web1 h1{ font-size:2.4rem; text-decoration:underline; color:#000080; }
-#web1 .blink{ animation:blink 1s steps(1) infinite; color:#cc0000; font-weight:bold; }
-@keyframes blink{ 50%{ opacity:0; } }
-#web1 .timeline::before{ background:repeating-linear-gradient(to bottom,#808080 0,#808080 4px,transparent 4px,transparent 8px); }
-#web1 .event .dot{ background:#000080; border:1px solid #000; border-radius:0; }
-#web1 .event .year{ color:#000080; font-family:Georgia,serif; }
+
+#web1 .era-kicker{
+    background:#c0c0c0;
+
+    color:#000;
+
+    border:1px solid #808080;
+
+    border-radius:0;
+
+    letter-spacing:0;
+}
+
+#web1 h1{
+    color:#000080;
+
+    font-size:2.7rem;
+
+    text-decoration:underline;
+}
+
+#web1 .era-sub{
+    color:#222;
+}
+
+#web1 .blink{
+    color:#cc0000;
+
+    font-weight:bold;
+
+    animation:blink 1s steps(1) infinite;
+}
+
+@keyframes blink{
+    50%{
+        opacity:0;
+    }
+}
+
+#web1 .timeline::before{
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #808080 0,
+            #808080 4px,
+            transparent 4px,
+            transparent 8px
+        );
+}
+
+#web1 .event .dot{
+    background:#000080;
+
+    border:1px solid #000;
+
+    border-radius:0;
+}
+
+#web1 .event .year{
+    color:#000080;
+}
+
 #web1 .card{
-  background:#f2f2f2;
-  border:1px solid #808080;
-  padding:12px 14px;
-  box-shadow:2px 2px 0 #999;
+    background:#f2f2f2;
+
+    color:#111;
+
+    border:1px solid #808080;
+
+    padding:12px 14px;
+
+    box-shadow:2px 2px 0 #999;
 }
-#web1 .card a, #web1 .card .fake-link{ color:#0000EE; text-decoration:underline; }
-#web1 .card:hover{ transform:none; background:#e8e8e8; box-shadow:1px 1px 0 #999; }
-#web1 .example-card{
-  background:#fff;
-  border:2px solid #808080;
+
+#web1 .card a{
+    color:#0000ee;
+
+    text-decoration:underline;
 }
-#web1 .example-card::before{ content:"📁 "; }
+
+#web1 .card a:visited{
+    color:#551a8b;
+}
+
+#web1 .card a:hover{
+    color:#fff;
+
+    background:#000080;
+}
+
+#web1 .card:hover{
+    background:#e8e8e8;
+
+    box-shadow:1px 1px 0 #999;
+}
+
+
+/* ============================================================
+   NAVEGADOR WEB 1.0
+   ============================================================ */
+
+.web1-browser{
+    width:min(760px,calc(100% - 40px));
+
+    margin:0 auto 50px;
+
+    background:#d4d0c8;
+
+    border:2px outset #eee;
+
+    box-shadow:
+        3px 3px 0 #555,
+        8px 8px 0 rgba(0,0,0,.15);
+}
+
+.browser-titlebar{
+    display:flex;
+
+    align-items:center;
+    justify-content:space-between;
+
+    padding:4px 6px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #000080,
+            #1084d0
+        );
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:bold;
+}
+
+.window-buttons{
+    display:flex;
+
+    gap:3px;
+}
+
+.window-buttons span{
+    width:18px;
+    height:18px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    background:#d4d0c8;
+
+    color:#000;
+
+    border:1px outset #fff;
+
+    font-family:Arial,sans-serif;
+
+    font-size:11px;
+}
+
+.browser-address{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:7px;
+
+    background:#d4d0c8;
+
+    border-bottom:1px solid #808080;
+
+    font-size:12px;
+}
+
+.browser-address code{
+    flex:1;
+
+    padding:3px 6px;
+
+    background:white;
+
+    color:#000;
+
+    border:2px inset #eee;
+
+    font-family:"Courier New",monospace;
+}
+
+
+/* ============================================================
+   TABLA WEB 1.0
+   ============================================================ */
+
 #web1 table.win95{
-  border-collapse:collapse;
-  width:100%;
-  margin:0 auto 30px;
-  max-width:700px;
-  border:2px outset #ccc;
-  background:#d4d0c8;
-  font-size:14px;
-}
-#web1 table.win95 td, #web1 table.win95 th{
-  border:1px solid #808080;
-  padding:8px 10px;
-}
-#web1 table.win95 th{ background:#000080; color:#fff; }
-#web1 .hit-counter{
-  display:inline-block;
-  font-family:'Courier New',monospace;
-  background:#000;
-  color:#0f0;
-  padding:4px 8px;
-  letter-spacing:2px;
-  border:1px solid #333;
+    width:100%;
+
+    max-width:700px;
+
+    margin:0 auto 30px;
+
+    border-collapse:collapse;
+
+    background:#d4d0c8;
+
+    border:2px outset #ccc;
+
+    font-size:14px;
 }
 
+#web1 table.win95 td,
+#web1 table.win95 th{
+    padding:9px 10px;
+
+    border:1px solid #808080;
+}
+
+#web1 table.win95 th{
+    background:#000080;
+
+    color:white;
+}
+
+#web1 table.win95 a{
+    color:#0000ee;
+
+    font-weight:normal;
+
+    text-decoration:underline;
+}
+
+#web1 table.win95 a:visited{
+    color:#551a8b;
+}
+
+#web1 table.win95 a:hover{
+    color:#fff;
+
+    background:#000080;
+}
+
+
 /* ============================================================
-   SECTION 2 — WEB 2.0 (2004–2010): social, colourful, AJAX-y
-   Rounded corners, gradients, drop shadows, Helvetica/Arial,
-   avatar bubbles, "loading" spinners, comment threads.
+   PÁGINAS INTERNAS WEB 1.0
    ============================================================ */
+
+.web1-pages{
+    width:min(900px,calc(100% - 40px));
+
+    margin:0 auto;
+}
+
+.web1-page{
+    margin-bottom:45px;
+
+    padding:20px;
+
+    background:#fff;
+
+    color:#111;
+
+    border:2px solid #808080;
+
+    box-shadow:3px 3px 0 #999;
+
+    scroll-margin-top:30px;
+}
+
+.page-header{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:18px;
+
+    padding-bottom:10px;
+
+    border-bottom:2px solid #000080;
+}
+
+.page-icon{
+    font-size:28px;
+}
+
+.page-file{
+    display:block;
+
+    margin-bottom:3px;
+
+    color:#555;
+
+    font-family:"Courier New",monospace;
+
+    font-size:12px;
+}
+
+.web1-page h2{
+    margin:0;
+
+    color:#000080;
+
+    font-size:24px;
+}
+
+.web1-page p{
+    line-height:1.7;
+}
+
+.under-construction{
+    margin-top:20px;
+
+    padding:12px;
+
+    background:#fff4a8;
+
+    color:#000;
+
+    border:2px dashed #cc0000;
+
+    font-weight:bold;
+}
+
+
+/* ============================================================
+   FOTOS
+   ============================================================ */
+
+.photo-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:15px;
+}
+
+.old-photo{
+    padding:7px;
+
+    background:#eee;
+
+    color:#111;
+
+    border:2px inset #ccc;
+
+    text-align:center;
+
+    font-family:"Courier New",monospace;
+
+    font-size:11px;
+}
+
+.photo-placeholder{
+    min-height:110px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    margin-bottom:6px;
+
+    background:
+        repeating-linear-gradient(
+            45deg,
+            #c0c0c0,
+            #c0c0c0 5px,
+            #dcdcdc 5px,
+            #dcdcdc 10px
+        );
+
+    color:#000080;
+
+    font-size:32px;
+}
+
+
+/* ============================================================
+   MÚSICA
+   ============================================================ */
+
+.music-player{
+    padding:15px;
+
+    background:#d4d0c8;
+
+    border:2px outset #fff;
+
+    box-shadow:2px 2px 0 #666;
+}
+
+.music-display{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:10px;
+
+    background:#000;
+
+    color:#00ff00;
+
+    font-family:"Courier New",monospace;
+}
+
+.music-display > span{
+    font-size:30px;
+}
+
+.music-display strong,
+.music-display small{
+    display:block;
+}
+
+.music-display small{
+    margin-top:3px;
+
+    color:#00cc00;
+}
+
+.music-controls{
+    display:flex;
+
+    gap:6px;
+
+    margin-top:10px;
+}
+
+.music-controls button{
+    min-width:45px;
+
+    padding:5px;
+
+    background:#d4d0c8;
+
+    color:#000;
+
+    border:2px outset #fff;
+
+    cursor:pointer;
+}
+
+.music-controls button:active{
+    border-style:inset;
+}
+
+
+/* ============================================================
+   GUESTBOOK
+   ============================================================ */
+
+.guestbook-form{
+    display:grid;
+
+    gap:7px;
+
+    padding:15px;
+
+    background:#d4d0c8;
+
+    border:2px inset #eee;
+}
+
+.guestbook-form label{
+    font-weight:bold;
+}
+
+.guestbook-form input,
+.guestbook-form textarea{
+    width:100%;
+
+    padding:7px;
+
+    color:#000;
+
+    background:white;
+
+    border:2px inset #eee;
+
+    font-family:"Times New Roman",serif;
+}
+
+.guestbook-form textarea{
+    resize:vertical;
+}
+
+.guestbook-form button{
+    justify-self:start;
+
+    padding:7px 12px;
+
+    color:#000;
+
+    background:#d4d0c8;
+
+    border:2px outset #fff;
+
+    cursor:pointer;
+
+    font-family:"Times New Roman",serif;
+
+    font-weight:bold;
+}
+
+.guestbook-form button:active{
+    border-style:inset;
+}
+
+.guestbook-entry{
+    margin-top:20px;
+
+    padding:12px;
+
+    background:#ffffee;
+
+    color:#111;
+
+    border:1px solid #808080;
+}
+
+.guestbook-entry p{
+    margin:8px 0;
+}
+
+.guestbook-entry small{
+    color:#555;
+
+    font-family:"Courier New",monospace;
+}
+
+
+/* ============================================================
+   WEBRING
+   ============================================================ */
+
+.webring-box{
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    gap:25px;
+
+    padding:15px;
+
+    background:#d4d0c8;
+
+    border:2px inset #eee;
+
+    text-align:center;
+}
+
+.webring-box a{
+    color:#0000ee;
+
+    text-decoration:underline;
+}
+
+.webring-box a:hover{
+    color:#fff;
+
+    background:#000080;
+}
+
+
+/* ============================================================
+   EJEMPLOS WEB 1
+   ============================================================ */
+
+#web1 .example-card{
+    background:#fff;
+
+    color:#111;
+
+    border:2px solid #808080;
+}
+
+
+/* ============================================================
+   WEB 2.0
+   ============================================================ */
+
 #web2{
-  font-family:Helvetica,Arial,sans-serif;
-  color:#222;
+    font-family:
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    color:#222;
 }
-#web2 .era-kicker{ background:linear-gradient(90deg,#4f9cff,#7b6cff); color:#fff; box-shadow:0 3px 10px rgba(79,156,255,.35); }
-#web2 h1{ font-size:2.6rem; background:linear-gradient(90deg,#ff6f61,#ffb347,#4f9cff); -webkit-background-clip:text; background-clip:text; color:transparent; }
-#web2 .timeline::before{ background:linear-gradient(to bottom,#4f9cff,#ff6f61); border-radius:2px; }
-#web2 .event .dot{ background:radial-gradient(circle at 30% 30%,#fff,#4f9cff); border:2px solid #fff; box-shadow:0 0 0 3px rgba(79,156,255,.35); }
-#web2 .event .year{ color:#3a6df0; }
+
+#web2 .era-kicker{
+    color:#fff;
+
+    background:
+        linear-gradient(
+            90deg,
+            #4f9cff,
+            #7b6cff
+        );
+
+    box-shadow:
+        0 3px 10px rgba(79,156,255,.35);
+}
+
+#web2 h1{
+    font-size:2.8rem;
+
+    background:
+        linear-gradient(
+            90deg,
+            #e84b3d,
+            #e58b18,
+            #1557c0
+        );
+
+    -webkit-background-clip:text;
+
+    background-clip:text;
+
+    color:transparent;
+}
+
+#web2 .era-sub{
+    color:#3d4655;
+
+    opacity:1;
+}
+
+#web2 .timeline::before{
+    background:
+        linear-gradient(
+            to bottom,
+            #4f9cff,
+            #ff6f61
+        );
+}
+
+#web2 .event .dot{
+    background:
+        radial-gradient(
+            circle at 30% 30%,
+            #fff,
+            #4f9cff
+        );
+
+    border:2px solid white;
+
+    box-shadow:
+        0 0 0 3px rgba(79,156,255,.35);
+}
+
+#web2 .event .year{
+    color:#1557c0;
+}
+
 #web2 .card{
-  background:#fff;
-  border-radius:16px;
-  padding:16px 18px;
-  box-shadow:0 8px 22px rgba(60,80,140,.14);
-  border:1px solid #eef0f6;
+    background:#fff;
+
+    color:#20242c;
+
+    border-radius:16px;
+
+    padding:16px 18px;
+
+    border:1px solid #eef0f6;
+
+    box-shadow:
+        0 8px 22px rgba(60,80,140,.14);
 }
-#web2 .card:hover{ transform:translateY(-4px) scale(1.01); box-shadow:0 14px 30px rgba(60,80,140,.22); }
+
+#web2 .card a{
+    color:#1557c0;
+
+    text-decoration:underline;
+}
+
+#web2 .card a:hover{
+    color:#0b3c8a;
+}
+
+#web2 .card:hover{
+    transform:translateY(-4px) scale(1.01);
+
+    box-shadow:
+        0 14px 30px rgba(60,80,140,.22);
+}
+
 #web2 .avatar{
-  width:34px; height:34px; border-radius:50%;
-  display:inline-flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,#ff9a8b,#4f9cff);
-  color:#fff; font-weight:700; font-size:13px;
-  margin-right:8px; vertical-align:middle;
+    width:34px;
+    height:34px;
+
+    display:inline-flex;
+
+    align-items:center;
+    justify-content:center;
+
+    margin-right:8px;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff9a8b,
+            #4f9cff
+        );
+
+    color:white;
+
+    font-weight:700;
+
+    font-size:13px;
+
+    vertical-align:middle;
 }
+
 #web2 .example-card{
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 10px 24px rgba(60,80,140,.14);
-}
-#web2 .example-card i{ color:#4f9cff; margin-right:6px; }
-#web2 .spinner{
-  display:inline-block; width:14px;height:14px;
-  border:2px solid #dbe4ff; border-top-color:#4f9cff; border-radius:50%;
-  animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:6px;
-}
-@keyframes spin{ to{ transform:rotate(360deg); } }
-#web2 .comment-box{
-  max-width:640px; margin:0 auto 40px; padding:16px 18px;
-  background:#fff; border-radius:14px; box-shadow:0 6px 18px rgba(60,80,140,.12);
-  font-size:14.5px;
+    background:#fff;
+
+    color:#20242c;
+
+    border-radius:18px;
+
+    box-shadow:
+        0 10px 24px rgba(60,80,140,.14);
 }
 
+#web2 .example-card i{
+    margin-right:6px;
+
+    color:#1557c0;
+}
+
+#web2 .example-card a{
+    color:#20242c;
+}
+
+#web2 .example-card a:hover{
+    color:#1557c0;
+}
+
+.spinner{
+    display:inline-block;
+
+    width:14px;
+    height:14px;
+
+    margin-right:6px;
+
+    border:2px solid #dbe4ff;
+
+    border-top-color:#4f9cff;
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+
+    vertical-align:middle;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.comment-box{
+    max-width:640px;
+
+    margin:0 auto 40px;
+
+    padding:16px 18px;
+
+    background:#fff;
+
+    color:#20242c;
+
+    border-radius:14px;
+
+    box-shadow:
+        0 6px 18px rgba(60,80,140,.12);
+
+    font-size:14.5px;
+}
+
+
 /* ============================================================
-   SECTION 3 — WEB 3.0 (2010–2020): minimal SaaS / Material-ish
-   Clean type, cards with soft shadow, dark accents, AI chat
-   bubbles, micro-interactions.
+   WEB 3.0
    ============================================================ */
+
 #web3{
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  color:#1c2230;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+
+    color:#1c2230;
 }
-#web3 .era-kicker{ background:#111827; color:#fff; }
-#web3 h1{ font-size:2.5rem; font-weight:700; letter-spacing:-0.02em; }
-#web3 .timeline::before{ background:#d7dce6; }
-#web3 .event .dot{ background:#fff; border:3px solid #2563eb; }
-#web3 .event .year{ color:#2563eb; font-weight:600; }
+
+#web3 .era-kicker{
+    background:#111827;
+
+    color:#fff;
+}
+
+#web3 h1{
+    font-size:2.7rem;
+
+    font-weight:700;
+
+    letter-spacing:-.03em;
+}
+
+#web3 .era-sub{
+    color:#3d4655;
+
+    opacity:1;
+}
+
+#web3 .timeline::before{
+    background:#d7dce6;
+}
+
+#web3 .event .dot{
+    background:#fff;
+
+    border:3px solid #2563eb;
+}
+
+#web3 .event .year{
+    color:#174ea6;
+}
+
 #web3 .card{
-  background:#fff;
-  border-radius:12px;
-  padding:16px 18px;
-  border:1px solid #e6e9f0;
-  box-shadow:0 1px 3px rgba(16,24,40,.06);
+    background:#fff;
+
+    color:#1c2230;
+
+    border-radius:12px;
+
+    padding:16px 18px;
+
+    border:1px solid #e6e9f0;
+
+    box-shadow:
+        0 1px 3px rgba(16,24,40,.06);
 }
-#web3 .card:hover{ transform:translateY(-3px); box-shadow:0 8px 20px rgba(16,24,40,.10); border-color:#c8d3ea; }
+
+#web3 .card a{
+    color:#174ea6;
+
+    text-decoration:underline;
+}
+
+#web3 .card a:hover{
+    color:#0b3d91;
+}
+
+#web3 .card:hover{
+    transform:translateY(-3px);
+
+    box-shadow:
+        0 8px 20px rgba(16,24,40,.10);
+}
+
 #web3 .example-card{
-  background:#fff;
-  border-radius:14px;
-  border:1px solid #e6e9f0;
-  box-shadow:0 1px 3px rgba(16,24,40,.06);
+    background:#fff;
+
+    color:#1c2230;
+
+    border-radius:14px;
+
+    border:1px solid #e6e9f0;
+
+    box-shadow:
+        0 1px 3px rgba(16,24,40,.06);
 }
-#web3 .example-card:hover{ box-shadow:0 10px 22px rgba(16,24,40,.10); }
-#web3 .chat-row{ max-width:520px; margin:0 auto 40px; }
-#web3 .bubble{
-  background:#2563eb; color:#fff; padding:10px 16px; border-radius:16px 16px 16px 4px;
-  display:inline-block; font-size:14.5px; max-width:80%;
+
+#web3 .example-card a{
+    color:#1c2230;
 }
-#web3 .bubble.ai{ background:#eef1f8; color:#1c2230; border-radius:16px 16px 4px 16px; float:right; clear:both; }
-#web3 .bubble.user{ float:left; clear:both; margin-bottom:10px; }
-#web3 .typing-dots span{
-  display:inline-block; width:5px; height:5px; background:#1c2230; border-radius:50%;
-  margin-right:3px; animation:tdot 1.2s infinite ease-in-out;
+
+#web3 .example-card a:hover{
+    color:#174ea6;
 }
-#web3 .typing-dots span:nth-child(2){ animation-delay:.15s; }
-#web3 .typing-dots span:nth-child(3){ animation-delay:.3s; }
-@keyframes tdot{ 0%,60%,100%{ opacity:.3; } 30%{ opacity:1; } }
+
+#web3 .example-card i{
+    color:#174ea6;
+}
+
+.chat-row{
+    max-width:520px;
+
+    min-height:90px;
+
+    margin:0 auto 40px;
+
+    overflow:hidden;
+}
+
+.bubble{
+    padding:10px 16px;
+
+    border-radius:16px;
+
+    display:inline-block;
+
+    font-size:14.5px;
+
+    max-width:80%;
+}
+
+.bubble.user{
+    float:left;
+
+    clear:both;
+
+    margin-bottom:10px;
+
+    background:#2563eb;
+
+    color:white;
+
+    border-radius:
+        16px 16px 16px 4px;
+}
+
+.bubble.ai{
+    float:right;
+
+    clear:both;
+
+    background:#eef1f8;
+
+    color:#1c2230;
+
+    border-radius:
+        16px 16px 4px 16px;
+}
+
+.typing-dots span{
+    display:inline-block;
+
+    width:5px;
+    height:5px;
+
+    margin-right:3px;
+
+    background:#1c2230;
+
+    border-radius:50%;
+
+    animation:tdot 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2){
+    animation-delay:.15s;
+}
+
+.typing-dots span:nth-child(3){
+    animation-delay:.3s;
+}
+
+@keyframes tdot{
+
+    0%,60%,100%{
+        opacity:.3;
+    }
+
+    30%{
+        opacity:1;
+    }
+
+}
+
 
 /* ============================================================
-   SECTION 4 — WEB 4.0 (2020–present): glassmorphism, neon,
-   3D tilt, particles, futuristic.
+   WEB 4.0
    ============================================================ */
+
 #web4{
-  font-family:'Space Grotesk',sans-serif;
-  color:#e9ecff;
-  position:relative;
-  padding-bottom:1px;
-  overflow:hidden;
+    position:relative;
+
+    overflow:hidden;
+
+    padding-bottom:1px;
+
+    font-family:
+        "Space Grotesk",
+        sans-serif;
+
+    color:#e9ecff;
 }
+
 #web4 .particles{
-  position:absolute; inset:0; z-index:0; pointer-events:none;
+    position:absolute;
+
+    inset:0;
+
+    z-index:0;
+
+    pointer-events:none;
 }
+
 #web4 .particles span{
-  position:absolute;
-  width:3px; height:3px;
-  background:#7ef7ff;
-  border-radius:50%;
-  opacity:.6;
-  box-shadow:0 0 8px 2px #7ef7ff;
-  animation:drift linear infinite;
+    position:absolute;
+
+    width:3px;
+    height:3px;
+
+    background:#7ef7ff;
+
+    border-radius:50%;
+
+    opacity:.6;
+
+    box-shadow:
+        0 0 8px 2px #7ef7ff;
+
+    animation:
+        drift linear infinite;
 }
+
 @keyframes drift{
-  from{ transform:translateY(0); }
-  to{ transform:translateY(-1200px); }
+
+    from{
+        transform:translateY(0);
+    }
+
+    to{
+        transform:translateY(-1200px);
+    }
+
 }
-#web4 > *{ position:relative; z-index:1; }
+
+#web4 > *{
+    position:relative;
+
+    z-index:1;
+}
+
 #web4 .era-kicker{
-  background:rgba(126,247,255,0.08);
-  border:1px solid rgba(126,247,255,0.4);
-  color:#7ef7ff;
-  font-family:'Orbitron',sans-serif;
-  text-shadow:0 0 8px rgba(126,247,255,.5);
+    background:rgba(126,247,255,.08);
+
+    border:1px solid rgba(126,247,255,.4);
+
+    color:#7ef7ff;
+
+    font-family:Orbitron,sans-serif;
+
+    text-shadow:
+        0 0 8px rgba(126,247,255,.5);
 }
+
 #web4 h1{
-  font-family:'Orbitron',sans-serif;
-  font-size:2.5rem;
-  background:linear-gradient(90deg,#7ef7ff,#c77dff,#ff6ec7);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  text-shadow:none;
+    font-family:Orbitron,sans-serif;
+
+    font-size:2.7rem;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7ef7ff,
+            #c77dff,
+            #ff6ec7
+        );
+
+    -webkit-background-clip:text;
+
+    background-clip:text;
+
+    color:transparent;
 }
-#web4 .timeline::before{ background:linear-gradient(to bottom,#7ef7ff,#c77dff,#ff6ec7); box-shadow:0 0 12px rgba(126,247,255,.4); }
+
+#web4 .era-sub{
+    color:#c9d2e8;
+
+    opacity:1;
+}
+
+#web4 .timeline::before{
+    background:
+        linear-gradient(
+            to bottom,
+            #7ef7ff,
+            #c77dff,
+            #ff6ec7
+        );
+
+    box-shadow:
+        0 0 12px rgba(126,247,255,.4);
+}
+
 #web4 .event .dot{
-  background:radial-gradient(circle at 30% 30%,#fff,#7ef7ff);
-  box-shadow:0 0 12px 3px rgba(126,247,255,.7);
+    background:
+        radial-gradient(
+            circle at 30% 30%,
+            #fff,
+            #7ef7ff
+        );
+
+    box-shadow:
+        0 0 12px 3px rgba(126,247,255,.7);
 }
-#web4 .event .year{ color:#7ef7ff; font-family:'JetBrains Mono',monospace; }
+
+#web4 .event .year{
+    color:#7ef7ff;
+
+    font-family:
+        "JetBrains Mono",
+        monospace;
+}
+
 #web4 .card{
-  background:rgba(255,255,255,0.06);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:16px;
-  padding:16px 18px;
-  transform-style:preserve-3d;
+    background:rgba(255,255,255,.06);
+
+    color:#edf2ff;
+
+    backdrop-filter:blur(14px);
+
+    -webkit-backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.14);
+
+    border-radius:16px;
+
+    padding:16px 18px;
+
+    transform-style:preserve-3d;
 }
+
+#web4 .card a{
+    color:#7ef7ff;
+
+    text-decoration:underline;
+}
+
+#web4 .card a:hover{
+    color:#fff;
+}
+
 #web4 .card:hover{
-  transform:translateY(-6px) rotateX(3deg) rotateY(-3deg);
-  box-shadow:0 0 24px rgba(126,247,255,.25), 0 14px 30px rgba(0,0,0,.4);
-  border-color:rgba(126,247,255,.5);
+    transform:
+        translateY(-6px)
+        rotateX(3deg)
+        rotateY(-3deg);
+
+    box-shadow:
+        0 0 24px rgba(126,247,255,.25),
+        0 14px 30px rgba(0,0,0,.4);
+
+    border-color:
+        rgba(126,247,255,.5);
 }
+
 #web4 .example-card{
-  background:rgba(255,255,255,0.06);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,0.14);
-  border-radius:18px;
+    background:rgba(255,255,255,.06);
+
+    color:#edf2ff;
+
+    backdrop-filter:blur(14px);
+
+    -webkit-backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.14);
+
+    border-radius:18px;
 }
+
+#web4 .example-card a{
+    color:#edf2ff;
+}
+
+#web4 .example-card a:hover{
+    color:#7ef7ff;
+}
+
+#web4 .example-card i{
+    color:#c77dff;
+}
+
 #web4 .example-card:hover{
-  box-shadow:0 0 26px rgba(199,125,255,.25);
-  border-color:rgba(199,125,255,.5);
+    box-shadow:
+        0 0 26px rgba(199,125,255,.25);
+
+    border-color:
+        rgba(199,125,255,.5);
 }
-#web4 .example-card i{ color:#c77dff; }
-#web4 .badge-xr{
-  display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px;
-  border:1px solid rgba(126,247,255,.5); color:#7ef7ff; padding:2px 8px; border-radius:999px;
-  margin-bottom:8px;
+
+.badge-xr{
+    display:inline-block;
+
+    padding:2px 8px;
+
+    margin-bottom:8px;
+
+    border:1px solid rgba(126,247,255,.5);
+
+    border-radius:999px;
+
+    color:#7ef7ff;
+
+    background:rgba(0,0,0,.25);
+
+    font-family:
+        "JetBrains Mono",
+        monospace;
+
+    font-size:11px;
 }
+
 #web4 footer{
-  text-align:center;
-  padding:60px 20px 40px;
-  font-family:'JetBrains Mono',monospace;
-  font-size:12px;
-  color:#8892b0;
+    padding:60px 20px 40px;
+
+    text-align:center;
+
+    color:#aeb8d0;
+
+    font-family:
+        "JetBrains Mono",
+        monospace;
+
+    font-size:12px;
 }
 
-/* Sources */
+
+/* ============================================================
+   FUENTES
+   ============================================================ */
+
 #sources{
-  max-width:760px; margin:0 auto; padding:0 20px 90px;
-}
-#sources h2{ text-align:center; }
-#sources ul{ line-height:1.9; font-size:14px; }
-#sources li a{
-  color:#e9ecff;
-  text-decoration:underline;
-}
-#sources li a:hover{ opacity:.8; }
+    max-width:760px;
 
-/* Utility for card grid density */
-.two-col-events .timeline{ max-width:960px; }
+    margin:0 auto;
+
+    padding:70px 20px 100px;
+
+    background:transparent;
+
+    color:#edf2ff;
+
+    font-family:Inter,sans-serif;
+}
+
+#sources h2{
+    text-align:center;
+}
+
+#sources ul{
+    line-height:1.9;
+
+    font-size:14px;
+}
+
+#sources li{
+    color:#d7deef;
+}
+
+#sources li a{
+    color:#7ef7ff;
+
+    text-decoration:underline;
+}
+
+#sources li a:hover{
+    color:#fff;
+}
+
+
+/* ============================================================
+   CONTRASTE Y ACCESIBILIDAD
+   ============================================================ */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible{
+    outline:3px solid #ffb000;
+
+    outline-offset:3px;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media(max-width:720px){
+
+    #era-nav{
+        right:8px;
+    }
+
+    #era-nav button::after{
+        display:none;
+    }
+
+    .timeline::before{
+        left:18px;
+    }
+
+    .event{
+        width:100%;
+
+        left:0 !important;
+
+        padding:
+            0
+            0
+            35px
+            46px !important;
+
+        text-align:left !important;
+    }
+
+    .event .dot{
+        left:11px !important;
+
+        right:auto !important;
+    }
+
+    .photo-grid{
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:500px){
+
+    .main-intro h1{
+        font-size:3.2rem;
+    }
+
+    .photo-grid{
+        grid-template-columns:1fr;
+    }
+
+    .webring-box{
+        flex-direction:column;
+    }
+
+}
+
+
+/* ============================================================
+   REDUCIR MOVIMIENTO
+   ============================================================ */
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation-duration:.01ms !important;
+
+        animation-iteration-count:1 !important;
+
+        transition-duration:.01ms !important;
+
+        scroll-behavior:auto !important;
+    }
+
+}
+
 </style>
 </head>
+
+
 <body>
+
+
+<!-- ============================================================
+     BARRA DE PROGRESO
+     ============================================================ -->
 
 <div id="progress-bar"></div>
 
+
+<!-- ============================================================
+     NAVEGACIÓN DE ERAS
+     ============================================================ -->
+
 <nav id="era-nav" aria-label="Navegador de eras">
-  <button data-target="web1" data-label="Web 1.0 · 1991–2003" class="active"></button>
-  <button data-target="web2" data-label="Web 2.0 · 2004–2010"></button>
-  <button data-target="web3" data-label="Web 3.0 · 2010–2020"></button>
-  <button data-target="web4" data-label="Web 4.0 · 2020–2026"></button>
+
+    <button
+        data-target="web1"
+        data-label="Web 1.0 · 1991–2003"
+        class="active">
+    </button>
+
+    <button
+        data-target="web2"
+        data-label="Web 2.0 · 2004–2010">
+    </button>
+
+    <button
+        data-target="web3"
+        data-label="Web 3.0 · 2010–2020">
+    </button>
+
+    <button
+        data-target="web4"
+        data-label="Web 4.0 · 2020–2026">
+    </button>
+
 </nav>
 
+
 <!-- ============================================================
-     INTRO — a tiny neutral splash before Web 1.0 begins
+     INTRODUCCIÓN
      ============================================================ -->
-<header style="text-align:center; padding:90px 20px 40px; font-family:'Inter',sans-serif;">
-  <p style="letter-spacing:.2em; font-size:12px; opacity:.55; margin-bottom:10px;">DESPLÁZATE PARA VIAJAR EN EL TIEMPO</p>
-  <h1 style="font-size:2.1rem; margin:0;">La Web, a medida que crecía</h1>
-  <p style="opacity:.6; max-width:600px; margin:14px auto 0; line-height:1.6;">
-    Esta página recorre la evolución de la web en cuatro actos. A medida que avanzas, el diseño y la narrativa se transforman para reflejar cada era: desde la sencillez de los primeros documentos hipertextuales hasta las experiencias inmersivas y conectadas de hoy.
-  </p>
-  <div style="margin-top:26px; font-size:22px; opacity:.4;"><i class="fa-solid fa-chevron-down"></i></div>
+
+<header class="main-intro">
+
+    <div class="intro-eyebrow">
+        HISTORIA · DISEÑO · TECNOLOGÍA
+    </div>
+
+    <h1>
+        La Web,<br>
+        a medida que crecía.
+    </h1>
+
+    <p>
+        La World Wide Web no siempre fue como la conocemos hoy.
+        Antes de las redes sociales, los teléfonos inteligentes
+        y la inteligencia artificial, existieron páginas sencillas,
+        enlaces azules, imágenes pequeñas y sitios construidos
+        prácticamente desde cero.
+    </p>
+
+    <p>
+        Este recorrido presenta cuatro etapas de esa evolución.
+        A medida que avanza la página, también cambia su lenguaje
+        visual: desde la estética rudimentaria de la Web 1.0 hasta
+        las interfaces inteligentes e inmersivas de la actualidad.
+    </p>
+
+    <div class="intro-scroll">
+        <span>Desplácese para comenzar</span>
+        <i class="fa-solid fa-arrow-down"></i>
+    </div>
+
 </header>
 
+
+
 <!-- ============================================================
-     SECTION 1 — WEB 1.0
+     WEB 1.0
      ============================================================ -->
+
 <section id="web1">
-  <div class="era-banner reveal">
-    <span class="era-kicker">🌐 WEB 1.0 · 1991–2003</span>
-    <h1>La Web Estática</h1>
-    <p class="era-sub">Páginas codificadas a mano. Diseños con tablas. <span class="blink">En construcción</span></p>
-    <p style="margin-top:10px;"><span class="hit-counter">VISITANTES: 004217</span></p>
-  </div>
 
-  <p style="max-width:700px; margin:0 auto 20px; text-align:center; font-style:italic; opacity:.8;">
-    Un ejemplo de menú de navegación típico de la época, construido con una simple tabla HTML.
-  </p>
 
-  <table class="win95 reveal">
-    <tr><th colspan="2">Navegación del sitio</th></tr>
-    <tr><td>Inicio</td><td><span class="fake-link">index.html</span></td></tr>
-    <tr><td>Sobre mí</td><td><span class="fake-link">about.html</span></td></tr>
-    <tr><td>Anillo web</td><td><span class="fake-link">¡Únete a nuestro anillo web! →</span></td></tr>
-  </table>
+    <div class="era-banner reveal">
 
-  <div class="timeline">
-    <div class="event reveal"><span class="dot"></span><span class="year">1987</span>
-      <div class="card">Larry Wall crea <a href="https://www.perl.org" target="_blank" rel="noopener">Perl</a>, uno de los primeros lenguajes utilizados para construir aplicaciones web.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1989</span>
-      <div class="card"><strong>Tim Berners-Lee</strong> propone la <a href="https://www.w3.org/History.html" target="_blank" rel="noopener">World Wide Web</a> mientras trabajaba en el CERN.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1991</span>
-      <div class="card">La primera página web se publica el 6 de agosto. Se definen por primera vez <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" rel="noopener">HTML</a> y <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP" target="_blank" rel="noopener">HTTP</a>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1993</span>
-      <div class="card"><strong>Marc Andreessen</strong> crea <a href="https://en.wikipedia.org/wiki/Mosaic_(web_browser)" target="_blank" rel="noopener">Mosaic</a>, el primer navegador gráfico popular.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1995</span>
-      <div class="card"><strong>Rasmus Lerdorf</strong> crea <a href="https://www.php.net" target="_blank" rel="noopener">PHP</a>. Netscape lanza <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noopener">JavaScript</a>. <strong>Benjamin Slivka</strong> y Microsoft lanzan <a href="https://www.microsoft.com/en-us/download/internet-explorer.aspx" target="_blank" rel="noopener">Internet Explorer</a>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1996</span>
-      <div class="card"><strong>Sabeer Bhatia</strong> y <strong>Jack Smith</strong> lanzan <a href="https://www.hotmail.com" target="_blank" rel="noopener">Hotmail</a>, el primer correo web.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">1997–1998</span>
-      <div class="card">Macromedia Flash llega. <strong>Larry Page</strong> y <strong>Sergey Brin</strong> fundan <a href="https://www.google.com" target="_blank" rel="noopener">Google</a>.</div>
-    </div>
-  </div>
+        <span class="era-kicker">
+            🌐 WEB 1.0 · 1991–2003
+        </span>
 
-  <div class="examples">
-    <h2>Por la web, alrededor de 1998</h2>
-    <div class="example-grid">
-      <div class="example-card reveal"><a href="https://es.wikipedia.org/wiki/GeoCities" target="_blank" rel="noopener">Páginas personales — alojadas en GeoCities, decoradas con fondos de mosaico y contadores de visitantes.</a></div>
-      <div class="example-card reveal"><a href="https://www.yahoo.com" target="_blank" rel="noopener">Yahoo! — un directorio curado a mano, cuando un «portal» significaba una lista de enlaces.</a></div>
-      <div class="example-card reveal"><a href="https://en.wikipedia.org/wiki/Nupedia" target="_blank" rel="noopener">Nupedia — el proyecto de enciclopedia revisada por expertos que pronto daría origen a Wikipedia.</a></div>
+        <h1>
+            La Web Estática
+        </h1>
+
+        <p class="era-sub">
+            Páginas construidas manualmente, navegación mediante
+            enlaces y una Internet que comenzaba a abrirse al público.
+            <span class="blink">En construcción</span>
+        </p>
+
+        <p style="margin-top:15px;">
+            <span class="hit-counter"
+                  style="
+                  display:inline-block;
+                  padding:4px 8px;
+                  background:#000;
+                  color:#00ff00;
+                  font-family:'Courier New',monospace;
+                  letter-spacing:2px;
+                  ">
+                VISITANTES: 004217
+            </span>
+        </p>
+
     </div>
-  </div>
+
+
+    <p style="
+        max-width:700px;
+        margin:0 auto 20px;
+        padding:0 20px;
+        text-align:center;
+        font-style:italic;
+        color:#333;
+        line-height:1.7;
+    ">
+
+        Un ejemplo de la navegación característica de una página
+        personal de finales de los años noventa.
+
+    </p>
+
+
+    <!-- NAVEGADOR SIMULADO -->
+
+    <div class="web1-browser reveal">
+
+        <div class="browser-titlebar">
+
+            <span>
+                Mi página personal
+            </span>
+
+            <div class="window-buttons">
+
+                <span>_</span>
+                <span>□</span>
+                <span>×</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="browser-address">
+
+            <span>
+                Dirección:
+            </span>
+
+            <code>
+                http://www.misitio.com/
+            </code>
+
+        </div>
+
+
+        <table class="win95">
+
+            <tr>
+                <th colspan="2">
+                    Navegación del sitio
+                </th>
+            </tr>
+
+            <tr>
+                <td>
+                    Inicio
+                </td>
+
+                <td>
+                    <a href="#web1-inicio">
+                        index.html
+                    </a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Sobre mí
+                </td>
+
+                <td>
+                    <a href="#sobre-mi">
+                        about.html
+                    </a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Mis fotos
+                </td>
+
+                <td>
+                    <a href="#mis-fotos">
+                        fotos.html
+                    </a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Mi música
+                </td>
+
+                <td>
+                    <a href="#mi-musica">
+                        musica.html
+                    </a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Guestbook
+                </td>
+
+                <td>
+                    <a href="#guestbook">
+                        guestbook.html
+                    </a>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    Anillo web
+                </td>
+
+                <td>
+                    <a href="#anillo-web">
+                        ¡Visitar el anillo web! →
+                    </a>
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- TIMELINE -->
+
+    <div class="timeline">
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1987
+            </span>
+
+            <div class="card">
+
+                Larry Wall crea
+                <a
+                    href="https://www.perl.org"
+                    target="_blank"
+                    rel="noopener">
+                    Perl
+                </a>,
+
+                uno de los lenguajes que posteriormente
+                tendría un papel importante en el desarrollo
+                de aplicaciones para Internet.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1989
+            </span>
+
+            <div class="card">
+
+                <strong>
+                    Tim Berners-Lee
+                </strong>
+
+                propone la
+                <a
+                    href="https://www.w3.org/History.html"
+                    target="_blank"
+                    rel="noopener">
+                    World Wide Web
+                </a>
+
+                mientras trabajaba en el CERN.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1991
+            </span>
+
+            <div class="card">
+
+                La primera página web se publica el
+                6 de agosto.
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/HTML"
+                    target="_blank"
+                    rel="noopener">
+                    HTML
+                </a>
+
+                y
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/HTTP"
+                    target="_blank"
+                    rel="noopener">
+                    HTTP
+                </a>
+
+                comienzan a establecer las bases
+                técnicas de la Web.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1993
+            </span>
+
+            <div class="card">
+
+                <strong>
+                    Marc Andreessen
+                </strong>
+
+                participa en la creación de
+                <a
+                    href="https://en.wikipedia.org/wiki/Mosaic_(web_browser)"
+                    target="_blank"
+                    rel="noopener">
+                    Mosaic
+                </a>,
+
+                uno de los navegadores gráficos
+                que ayudaron a popularizar la Web.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1995
+            </span>
+
+            <div class="card">
+
+                <strong>
+                    Rasmus Lerdorf
+                </strong>
+
+                crea
+
+                <a
+                    href="https://www.php.net"
+                    target="_blank"
+                    rel="noopener">
+                    PHP
+                </a>.
+
+                Netscape populariza
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+                    target="_blank"
+                    rel="noopener">
+                    JavaScript
+                </a>,
+
+                mientras Microsoft impulsa
+
+                <a
+                    href="https://www.microsoft.com/en-us/download/internet-explorer.aspx"
+                    target="_blank"
+                    rel="noopener">
+                    Internet Explorer
+                </a>.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1996
+            </span>
+
+            <div class="card">
+
+                <strong>
+                    Sabeer Bhatia
+                </strong>
+
+                y
+
+                <strong>
+                    Jack Smith
+                </strong>
+
+                lanzan
+
+                <a
+                    href="https://www.hotmail.com"
+                    target="_blank"
+                    rel="noopener">
+                    Hotmail
+                </a>,
+
+                uno de los servicios de correo electrónico
+                accesibles directamente desde la Web.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                1997–1998
+            </span>
+
+            <div class="card">
+
+                Macromedia Flash comienza a transformar
+                las posibilidades multimedia de la Web.
+
+                <strong>
+                    Larry Page
+                </strong>
+
+                y
+
+                <strong>
+                    Sergey Brin
+                </strong>
+
+                fundan
+
+                <a
+                    href="https://www.google.com"
+                    target="_blank"
+                    rel="noopener">
+                    Google
+                </a>.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================================
+         PÁGINAS PERSONALES
+         ======================================================== -->
+
+    <div class="web1-pages">
+
+
+        <!-- INICIO -->
+
+        <article
+            id="web1-inicio"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    🏠
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        index.html
+                    </span>
+
+                    <h2>
+                        Bienvenido a mi página personal
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                Bienvenido a mi pequeño espacio en Internet.
+                Esta página fue creada para compartir información
+                personal, fotografías, música y algunos de mis
+                intereses.
+
+            </p>
+
+
+            <p>
+
+                En aquellos primeros años de la Web, una página
+                personal constituía una manera sencilla de presentarse
+                ante el mundo. No era necesario disponer de una
+                plataforma compleja: bastaban un archivo HTML,
+                algunas imágenes y un servidor.
+
+            </p>
+
+
+            <div class="under-construction">
+
+                🚧 Esta página se encuentra actualmente
+                en construcción. Vuelva pronto para consultar
+                las próximas actualizaciones.
+
+            </div>
+
+        </article>
+
+
+
+        <!-- SOBRE MÍ -->
+
+        <article
+            id="sobre-mi"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    👤
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        about.html
+                    </span>
+
+                    <h2>
+                        Sobre mí
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                Mi nombre es Alex y esta es mi página personal.
+                Me interesan la tecnología, la música, la fotografía
+                y, especialmente, la manera en que Internet ha
+                transformado nuestra forma de comunicarnos.
+
+            </p>
+
+
+            <p>
+
+                Cuando construí este sitio, mi intención era reunir
+                en un solo lugar aquellas cosas que considero
+                importantes y compartirlas con familiares,
+                amigos y visitantes de Internet.
+
+            </p>
+
+
+            <p>
+                Gracias por dedicar unos minutos a conocer este sitio.
+            </p>
+
+
+            <p>
+                <strong>
+                    — Alex
+                </strong>
+            </p>
+
+        </article>
+
+
+
+        <!-- MIS FOTOS -->
+
+        <article
+            id="mis-fotos"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    📷
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        fotos.html
+                    </span>
+
+                    <h2>
+                        Mis fotografías
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                Una pequeña colección de fotografías personales.
+                En los primeros años de la Web era habitual publicar
+                imágenes comprimidas, con resoluciones reducidas
+                y nombres de archivo sencillos.
+
+            </p>
+
+
+            <div class="photo-grid">
+
+
+                <div class="old-photo">
+
+                    <div class="photo-placeholder">
+                        📷
+                    </div>
+
+                    foto_01.jpg
+
+                </div>
+
+
+                <div class="old-photo">
+
+                    <div class="photo-placeholder">
+                        🌄
+                    </div>
+
+                    viaje_01.jpg
+
+                </div>
+
+
+                <div class="old-photo">
+
+                    <div class="photo-placeholder">
+                        🏙️
+                    </div>
+
+                    ciudad.jpg
+
+                </div>
+
+
+                <div class="old-photo">
+
+                    <div class="photo-placeholder">
+                        👥
+                    </div>
+
+                    amigos.jpg
+
+                </div>
+
+
+            </div>
+
+        </article>
+
+
+
+        <!-- MI MÚSICA -->
+
+        <article
+            id="mi-musica"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    🎵
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        musica.html
+                    </span>
+
+                    <h2>
+                        Mi música
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                Esta sección reúne algunas de mis canciones favoritas.
+                Antes de los servicios de streaming, era frecuente
+                encontrar en las páginas personales listas de
+                reproducción, archivos MIDI o pequeños reproductores.
+
+            </p>
+
+
+            <div class="music-player">
+
+                <div class="music-display">
+
+                    <span>
+                        ♫
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Mi canción favorita
+                        </strong>
+
+                        <small>
+                            archivo_musica.mid
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="music-controls">
+
+                    <button type="button">
+                        ◀◀
+                    </button>
+
+                    <button type="button">
+                        ▶
+                    </button>
+
+                    <button type="button">
+                        ▶▶
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- GUESTBOOK -->
+
+        <article
+            id="guestbook"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    📖
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        guestbook.html
+                    </span>
+
+                    <h2>
+                        Libro de visitas
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                ¿Ha disfrutado de su visita?
+
+                Puede dejar un mensaje en nuestro libro de visitas.
+                Los libros de visitas fueron una de las formas más
+                sencillas de establecer una conversación entre el
+                propietario de una página y sus visitantes.
+
+            </p>
+
+
+            <form
+                class="guestbook-form"
+                onsubmit="return false;">
+
+                <label for="guest-name">
+                    Nombre:
+                </label>
+
+                <input
+                    id="guest-name"
+                    type="text"
+                    placeholder="Escriba su nombre">
+
+
+                <label for="guest-message">
+                    Mensaje:
+                </label>
+
+                <textarea
+                    id="guest-message"
+                    rows="5"
+                    placeholder="Escriba aquí su mensaje...">
+                </textarea>
+
+
+                <button type="submit">
+                    Firmar el libro de visitas
+                </button>
+
+            </form>
+
+
+            <div class="guestbook-entry">
+
+                <strong>
+                    Visitante_0042
+                </strong>
+
+                <p>
+
+                    ¡Excelente página!
+                    Volveré pronto para comprobar
+                    las nuevas actualizaciones.
+
+                </p>
+
+                <small>
+                    Publicado el 14/08/1999
+                </small>
+
+            </div>
+
+        </article>
+
+
+
+        <!-- ANILLO WEB -->
+
+        <article
+            id="anillo-web"
+            class="web1-page reveal">
+
+            <div class="page-header">
+
+                <span class="page-icon">
+                    🔗
+                </span>
+
+                <div>
+
+                    <span class="page-file">
+                        webring.html
+                    </span>
+
+                    <h2>
+                        Anillo web
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <p>
+
+                Los anillos web permitían conectar páginas personales
+                independientes mediante una red de enlaces. Era una
+                forma temprana de descubrir nuevos sitios sin depender
+                de los sistemas de recomendación actuales.
+
+            </p>
+
+
+            <div class="webring-box">
+
+                <a href="#web1-inicio">
+                    ← Página anterior
+                </a>
+
+                <span>
+                    ★
+                </span>
+
+                <a href="#sobre-mi">
+                    Página siguiente →
+                </a>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+
+    <!-- EJEMPLOS -->
+
+    <div class="examples">
+
+        <h2>
+            La Web alrededor de 1998
+        </h2>
+
+
+        <div class="example-grid">
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://es.wikipedia.org/wiki/GeoCities"
+                    target="_blank"
+                    rel="noopener">
+
+                    📁
+
+                    Páginas personales alojadas en GeoCities,
+                    decoradas con fondos de mosaico y contadores
+                    de visitantes.
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.yahoo.com"
+                    target="_blank"
+                    rel="noopener">
+
+                    📁
+
+                    Yahoo! — un directorio de sitios que representa
+                    una época en la que descubrir páginas significaba
+                    recorrer listas de enlaces seleccionados.
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://en.wikipedia.org/wiki/Nupedia"
+                    target="_blank"
+                    rel="noopener">
+
+                    📁
+
+                    Nupedia — proyecto de enciclopedia revisada
+                    por expertos que posteriormente precedería
+                    a Wikipedia.
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
 
+
+
 <!-- ============================================================
-     SECTION 2 — WEB 2.0
+     WEB 2.0
      ============================================================ -->
+
 <section id="web2">
-  <div class="era-banner reveal">
-    <span class="era-kicker">💬 WEB 2.0 · 2004–2010</span>
-    <h1>La Web Social</h1>
-    <p class="era-sub">Todos tienen un perfil. Todos tienen una caja de comentarios.</p>
-  </div>
 
-  <div class="comment-box reveal">
-    <span class="avatar">JD</span><strong>jane_doe</strong> comentó: <span class="spinner"></span>cargando nuevas publicaciones…
-  </div>
 
-  <div class="timeline">
-    <div class="event reveal"><span class="dot"></span><span class="year">2004</span>
-      <div class="card"><span class="avatar">TW</span><strong>Tim O'Reilly</strong> y <strong>Dale Dougherty</strong> acuñan el término «Web 2.0». <strong>Mark Zuckerberg</strong> lanza <a href="https://www.facebook.com" target="_blank" rel="noopener">Facebook</a> desde su habitación de residencia.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2005</span>
-      <div class="card"><span class="avatar">YT</span><strong>Chad Hurley</strong>, <strong>Steve Chen</strong> y <strong>Jawed Karim</strong> fundan <a href="https://www.youtube.com" target="_blank" rel="noopener">YouTube</a>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2006</span>
-      <div class="card"><span class="avatar">TW</span><a href="https://twitter.com" target="_blank" rel="noopener">Twitter</a> (ahora X) se lanza, creado por <strong>Jack Dorsey</strong>, <strong>Biz Stone</strong> y <strong>Evan Williams</strong>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2007</span>
-      <div class="card"><span class="avatar">📱</span>El primer <a href="https://www.apple.com/iphone/" target="_blank" rel="noopener">iPhone</a> sale al mercado, provocando la revolución de la web móvil.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2008</span>
-      <div class="card"><span class="avatar">GC</span><strong>Dave Hyatt</strong>, <strong>Joe Hewitt</strong> y <strong>Blake Ross</strong>, trabajando en Google, lanzan el navegador <a href="https://www.google.com/chrome/" target="_blank" rel="noopener">Chrome</a>.</div>
-    </div>
-  </div>
+    <div class="era-banner reveal">
 
-  <div class="examples">
-    <h2>La web social, en su apogeo</h2>
-    <div class="example-grid">
-      <div class="example-card reveal"><a href="https://www.facebook.com" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i> Facebook <span class="creator">Mark Zuckerberg</span></a></div>
-      <div class="example-card reveal"><a href="https://www.youtube.com" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i> YouTube <span class="creator">Hurley, Chen y Karim</span></a></div>
-      <div class="example-card reveal"><a href="https://www.wikipedia.org" target="_blank" rel="noopener"><i class="fa-brands fa-wikipedia-w"></i> Wikipedia <span class="creator">Jimmy Wales y Larry Sanger</span></a></div>
-      <div class="example-card reveal"><a href="https://wordpress.org" target="_blank" rel="noopener"><i class="fa-brands fa-wordpress"></i> WordPress <span class="creator">Matt Mullenweg y Mike Little</span></a></div>
-      <div class="example-card reveal"><a href="https://www.hotmail.com" target="_blank" rel="noopener"><i class="fa-regular fa-envelope"></i> Hotmail <span class="creator">Sabeer Bhatia y Jack Smith</span></a></div>
+        <span class="era-kicker">
+            💬 WEB 2.0 · 2004–2010
+        </span>
+
+        <h1>
+            La Web Social
+        </h1>
+
+        <p class="era-sub">
+
+            La Web deja de ser principalmente estática y comienza
+            a convertirse en un espacio de participación,
+            conversación y creación colectiva.
+
+        </p>
+
     </div>
-  </div>
+
+
+    <div class="comment-box reveal">
+
+        <span class="avatar">
+            JD
+        </span>
+
+        <strong>
+            jane_doe
+        </strong>
+
+        comentó:
+
+        <span class="spinner"></span>
+
+        cargando nuevas publicaciones…
+
+    </div>
+
+
+    <div class="timeline">
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2004
+            </span>
+
+            <div class="card">
+
+                <span class="avatar">
+                    TW
+                </span>
+
+                <strong>
+                    Tim O'Reilly
+                </strong>
+
+                y
+
+                <strong>
+                    Dale Dougherty
+                </strong>
+
+                popularizan el término «Web 2.0».
+
+                <strong>
+                    Mark Zuckerberg
+                </strong>
+
+                lanza
+
+                <a
+                    href="https://www.facebook.com"
+                    target="_blank"
+                    rel="noopener">
+                    Facebook
+                </a>.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2005
+            </span>
+
+            <div class="card">
+
+                <span class="avatar">
+                    YT
+                </span>
+
+                <strong>
+                    Chad Hurley
+                </strong>,
+
+                <strong>
+                    Steve Chen
+                </strong>
+
+                y
+
+                <strong>
+                    Jawed Karim
+                </strong>
+
+                fundan
+
+                <a
+                    href="https://www.youtube.com"
+                    target="_blank"
+                    rel="noopener">
+                    YouTube
+                </a>.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2006
+            </span>
+
+            <div class="card">
+
+                <span class="avatar">
+                    TW
+                </span>
+
+                <a
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener">
+                    Twitter
+                </a>
+
+                comienza su recorrido como plataforma
+                de comunicación breve y pública.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2007
+            </span>
+
+            <div class="card">
+
+                <span class="avatar">
+                    📱
+                </span>
+
+                El primer
+
+                <a
+                    href="https://www.apple.com/iphone/"
+                    target="_blank"
+                    rel="noopener">
+                    iPhone
+                </a>
+
+                llega al mercado y contribuye a acelerar
+                la transición hacia una Web pensada también
+                para dispositivos móviles.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2008
+            </span>
+
+            <div class="card">
+
+                <span class="avatar">
+                    GC
+                </span>
+
+                Google presenta
+
+                <a
+                    href="https://www.google.com/chrome/"
+                    target="_blank"
+                    rel="noopener">
+                    Chrome
+                </a>,
+
+                un navegador que posteriormente adquiriría
+                una presencia dominante en la Web.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="examples">
+
+        <h2>
+            La Web social, en su apogeo
+        </h2>
+
+        <div class="example-grid">
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.facebook.com"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-brands fa-facebook"></i>
+
+                    Facebook
+
+                    <span class="creator">
+                        Mark Zuckerberg
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.youtube.com"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-brands fa-youtube"></i>
+
+                    YouTube
+
+                    <span class="creator">
+                        Hurley, Chen y Karim
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.wikipedia.org"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-brands fa-wikipedia-w"></i>
+
+                    Wikipedia
+
+                    <span class="creator">
+                        Jimmy Wales y Larry Sanger
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://wordpress.org"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-brands fa-wordpress"></i>
+
+                    WordPress
+
+                    <span class="creator">
+                        Matt Mullenweg y Mike Little
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.hotmail.com"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-regular fa-envelope"></i>
+
+                    Hotmail
+
+                    <span class="creator">
+                        Sabeer Bhatia y Jack Smith
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
 
+
+
 <!-- ============================================================
-     SECTION 3 — WEB 3.0
+     WEB 3.0
      ============================================================ -->
+
 <section id="web3">
-  <div class="era-banner reveal">
-    <span class="era-kicker">◆ WEB 3.0 · 2010–2020</span>
-    <h1>La Web Inteligente y Descentralizada</h1>
-    <p class="era-sub">Datos semánticos, contratos inteligentes y software que empieza a responder.</p>
-  </div>
 
-  <div class="chat-row reveal">
-    <div class="bubble user">¿Puedes resumir esta página para mí?</div>
-    <div class="bubble ai">Claro, dame un segundo<span class="typing-dots"><span></span><span></span><span></span></span></div>
-  </div>
 
-  <div class="timeline">
-    <div class="event reveal"><span class="dot"></span><span class="year">2010</span>
-      <div class="card">El término «Web 3.0» gana fuerza, retomando el concepto anterior de «Web Semántica» de <strong>Tim Berners-Lee</strong>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2014</span>
-      <div class="card"><strong>Gavin Wood</strong>, cofundador de <a href="https://ethereum.org" target="_blank" rel="noopener">Ethereum</a>, acuña «Web3», centrada en la descentralización blockchain.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2015</span>
-      <div class="card"><a href="https://ethereum.org" target="_blank" rel="noopener">Ethereum</a> se lanza, permitiendo contratos inteligentes y aplicaciones descentralizadas (dApps).</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2016</span>
-      <div class="card"><strong>Alex Russell</strong> y <strong>Frances Berriman</strong>, en Google, presentan las <a href="https://web.dev/progressive-web-apps/" target="_blank" rel="noopener">Aplicaciones Web Progresivas</a>.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2017</span>
-      <div class="card"><a href="https://webassembly.org" target="_blank" rel="noopener">WebAssembly</a> (Wasm) emerge, acercando un rendimiento casi nativo al navegador.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2018</span>
-      <div class="card">Los principales navegadores adoptan los <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank" rel="noopener">Componentes Web</a> como estándar compartido.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2019</span>
-      <div class="card">Las funciones impulsadas por IA — chatbots, búsqueda predictiva — se vuelven comunes en las aplicaciones web.</div>
-    </div>
-  </div>
+    <div class="era-banner reveal">
 
-  <div class="examples">
-    <h2>Inteligente, semántica y ligeramente descentralizada</h2>
-    <div class="example-grid">
-      <div class="example-card reveal"><a href="https://www.apple.com/siri/" target="_blank" rel="noopener"><i class="fa-solid fa-microphone"></i> Siri — un asistente integrado en la experiencia de navegación</a></div>
-      <div class="example-card reveal"><a href="https://chat.openai.com" target="_blank" rel="noopener"><i class="fa-solid fa-comment-dots"></i> ChatGPT (web) — IA conversacional en la web abierta</a></div>
-      <div class="example-card reveal"><a href="https://ethereum.org/en/dapps/" target="_blank" rel="noopener"><i class="fa-solid fa-link"></i> dApps — aplicaciones descentralizadas que se ejecutan en contratos inteligentes</a></div>
-      <div class="example-card reveal"><a href="https://ethereum.org/en/wallets/" target="_blank" rel="noopener"><i class="fa-solid fa-cubes"></i> Servicios y monederos basados en blockchain</a></div>
-      <div class="example-card reveal"><a href="https://en.wikipedia.org/wiki/Recommender_system" target="_blank" rel="noopener"><i class="fa-solid fa-wand-magic-sparkles"></i> Motores de recomendación impulsados por IA</a></div>
+        <span class="era-kicker">
+            ◆ WEB 3.0 · 2010–2020
+        </span>
+
+        <h1>
+            La Web Inteligente y Descentralizada
+        </h1>
+
+        <p class="era-sub">
+
+            La Web comienza a interpretar mejor los datos,
+            a adaptarse a las necesidades de cada usuario y
+            a explorar nuevas formas de descentralización
+            e inteligencia.
+
+        </p>
+
     </div>
-  </div>
+
+
+    <div class="chat-row reveal">
+
+        <div class="bubble user">
+
+            ¿Puedes resumir esta página para mí?
+
+        </div>
+
+        <div class="bubble ai">
+
+            Claro, dame un segundo
+
+            <span class="typing-dots">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="timeline">
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2010
+            </span>
+
+            <div class="card">
+
+                El concepto de «Web 3.0» gana fuerza
+                relacionado con la idea de una Web
+                más semántica e inteligente.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2014
+            </span>
+
+            <div class="card">
+
+                <strong>
+                    Gavin Wood
+                </strong>
+
+                participa en la definición del concepto
+                moderno de Web3, asociado a la descentralización.
+
+                <a
+                    href="https://ethereum.org"
+                    target="_blank"
+                    rel="noopener">
+                    Ethereum
+                </a>
+
+                se convierte en una de las plataformas
+                centrales de este movimiento.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2015
+            </span>
+
+            <div class="card">
+
+                <a
+                    href="https://ethereum.org"
+                    target="_blank"
+                    rel="noopener">
+                    Ethereum
+                </a>
+
+                se lanza oficialmente y permite desarrollar
+                contratos inteligentes y aplicaciones
+                descentralizadas.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2016
+            </span>
+
+            <div class="card">
+
+                Las
+
+                <a
+                    href="https://web.dev/progressive-web-apps/"
+                    target="_blank"
+                    rel="noopener">
+                    Aplicaciones Web Progresivas
+                </a>
+
+                comienzan a establecer un nuevo modelo
+                de aplicaciones capaces de combinar
+                características de la Web y de las
+                aplicaciones tradicionales.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2017
+            </span>
+
+            <div class="card">
+
+                <a
+                    href="https://webassembly.org"
+                    target="_blank"
+                    rel="noopener">
+                    WebAssembly
+                </a>
+
+                permite acercar al navegador determinadas
+                cargas de trabajo a un rendimiento
+                cercano al código nativo.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2018
+            </span>
+
+            <div class="card">
+
+                Los
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/Web_Components"
+                    target="_blank"
+                    rel="noopener">
+                    Componentes Web
+                </a>
+
+                consolidan un conjunto de tecnologías
+                orientadas a crear componentes reutilizables
+                directamente en el navegador.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2019
+            </span>
+
+            <div class="card">
+
+                Las funciones impulsadas por inteligencia
+                artificial comienzan a integrarse cada vez
+                más en buscadores, asistentes y aplicaciones
+                web.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="examples">
+
+        <h2>
+            Inteligente, semántica y conectada
+        </h2>
+
+
+        <div class="example-grid">
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.apple.com/siri/"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-microphone"></i>
+
+                    Siri
+
+                    <span class="creator">
+                        Asistencia mediante voz
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://chat.openai.com"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-comment-dots"></i>
+
+                    ChatGPT
+
+                    <span class="creator">
+                        IA conversacional
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://ethereum.org/en/dapps/"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-link"></i>
+
+                    dApps
+
+                    <span class="creator">
+                        Aplicaciones descentralizadas
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://ethereum.org/en/wallets/"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-cubes"></i>
+
+                    Monederos digitales
+
+                    <span class="creator">
+                        Servicios basados en blockchain
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://en.wikipedia.org/wiki/Recommender_system"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                    Sistemas de recomendación
+
+                    <span class="creator">
+                        Personalización mediante datos e IA
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
 
+
+
 <!-- ============================================================
-     SECTION 4 — WEB 4.0
+     WEB 4.0
      ============================================================ -->
+
 <section id="web4">
-  <div class="particles" id="particles"></div>
 
-  <div class="era-banner reveal">
-    <span class="era-kicker">⟡ WEB 4.0 · 2020–2026</span>
-    <h1>La Web Inteligente y Ubicua</h1>
-    <p class="era-sub">Cristal, luz e IA entretejidos en cada interacción.</p>
-  </div>
 
-  <div class="timeline">
-    <div class="event reveal"><span class="dot"></span><span class="year">2020</span>
-      <div class="card">La COVID-19 acelera la adopción de aplicaciones web para trabajo remoto, educación y comercio electrónico. <a href="https://jamstack.org" target="_blank" rel="noopener">JAMstack</a> y <a href="https://vitejs.dev" target="_blank" rel="noopener">Vite</a> ganan popularidad.</div>
+    <div
+        class="particles"
+        id="particles">
     </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2021</span>
-      <div class="card"><a href="https://webassembly.org" target="_blank" rel="noopener">WebAssembly</a> madura para la computación en el navegador de alto rendimiento. Los <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank" rel="noopener">Componentes Web</a> se generalizan. <a href="https://nextjs.org" target="_blank" rel="noopener">Next.js</a> y <a href="https://sveltekit.com" target="_blank" rel="noopener">SvelteKit</a> ganan tracción.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2022</span>
-      <div class="card"><a href="https://ethereum.org/en/web3/" target="_blank" rel="noopener">Web3</a> y las dApps ganan tracción real. <a href="https://graphql.org" target="_blank" rel="noopener">GraphQL</a> y <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API" target="_blank" rel="noopener">WebSockets</a> mejoran el manejo de datos en tiempo real.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2023</span>
-      <div class="card">La IA generativa se integra masivamente en las aplicaciones web. <a href="https://github.com/features/copilot" target="_blank" rel="noopener">GitHub Copilot</a> transforma la forma en que se construye la propia web.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2024</span>
-      <div class="card">La «UI generativa» emerge como concepto. <a href="https://www.wix.com/adi" target="_blank" rel="noopener">Wix ADI</a> y otras plataformas low-code añaden asistentes de IA.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2025</span>
-      <div class="card">Las aplicaciones web se vuelven multimodales — texto, imagen, audio y video juntos. La computación en el borde y serverless se convierten en la norma, con modelos como <a href="#" onclick="return false;">LLAMA-VISIONX</a> que permiten una interacción multimodal avanzada.</div>
-    </div>
-    <div class="event reveal"><span class="dot"></span><span class="year">2026</span>
-      <div class="card"><span class="badge-xr">PRESENTE</span><br>Las experiencias <a href="https://immersiveweb.dev" target="_blank" rel="noopener">WebXR</a> se vuelven comunes en el navegador. El glassmorphism y la UI futurista dominan. La IA se convierte en el orquestador central de la personalización, la accesibilidad y la funcionalidad.</div>
-    </div>
-  </div>
 
-  <div class="examples">
-    <h2>Cómo se ve la web ahora</h2>
-    <div class="example-grid">
-      <div class="example-card reveal"><a href="https://immersiveweb.dev" target="_blank" rel="noopener"><i class="fa-solid fa-vr-cardboard"></i> Experiencias WebXR — realidad virtual y aumentada, sin necesidad de instalar aplicaciones</a></div>
-      <div class="example-card reveal"><a href="#" onclick="return false;"><i class="fa-solid fa-brain"></i> LLAMA-VISIONX — IA multimodal integrada directamente en las aplicaciones</a></div>
-      <div class="example-card reveal"><a href="https://www.shopify.com/ar" target="_blank" rel="noopener"><i class="fa-solid fa-shirt"></i> Tiendas virtuales inmersivas con pruebas de realidad aumentada</a></div>
-      <div class="example-card reveal"><a href="https://www.ibm.com/watson-health" target="_blank" rel="noopener"><i class="fa-solid fa-notes-medical"></i> Asistentes médicos de IA que analizan datos en tiempo real</a></div>
-    </div>
-  </div>
 
-  <footer>LA WEB __ SIGUE EVOLUCIONANDO . GRACIAS A TODOS NOSOTROS</footer>
+    <div class="era-banner reveal">
+
+        <span class="era-kicker">
+            ⟡ WEB 4.0 · 2020–2026
+        </span>
+
+        <h1>
+            La Web Inteligente y Ubicua
+        </h1>
+
+        <p class="era-sub">
+
+            La Web se convierte progresivamente en una experiencia
+            más inteligente, contextual e integrada, en la que
+            la inteligencia artificial, los dispositivos y las
+            interfaces inmersivas empiezan a trabajar conjuntamente.
+
+        </p>
+
+    </div>
+
+
+    <div class="timeline">
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2020
+            </span>
+
+            <div class="card">
+
+                La pandemia acelera la adopción de aplicaciones
+                web para trabajo remoto, educación y comercio
+                electrónico.
+
+                <a
+                    href="https://jamstack.org"
+                    target="_blank"
+                    rel="noopener">
+                    JAMstack
+                </a>
+
+                y
+
+                <a
+                    href="https://vitejs.dev"
+                    target="_blank"
+                    rel="noopener">
+                    Vite
+                </a>
+
+                adquieren una presencia cada vez mayor.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2021
+            </span>
+
+            <div class="card">
+
+                <a
+                    href="https://webassembly.org"
+                    target="_blank"
+                    rel="noopener">
+                    WebAssembly
+                </a>
+
+                continúa evolucionando.
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/Web_Components"
+                    target="_blank"
+                    rel="noopener">
+                    Los Componentes Web
+                </a>
+
+                se consolidan y herramientas como
+
+                <a
+                    href="https://nextjs.org"
+                    target="_blank"
+                    rel="noopener">
+                    Next.js
+                </a>
+
+                y
+
+                <a
+                    href="https://svelte.dev"
+                    target="_blank"
+                    rel="noopener">
+                    Svelte
+                </a>
+
+                ganan popularidad.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2022
+            </span>
+
+            <div class="card">
+
+                <a
+                    href="https://ethereum.org/en/web3/"
+                    target="_blank"
+                    rel="noopener">
+                    Web3
+                </a>
+
+                y las aplicaciones descentralizadas
+                reciben una atención significativa.
+
+                Tecnologías como
+
+                <a
+                    href="https://graphql.org"
+                    target="_blank"
+                    rel="noopener">
+                    GraphQL
+                </a>
+
+                y
+
+                <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API"
+                    target="_blank"
+                    rel="noopener">
+                    WebSockets
+                </a>
+
+                permiten experiencias más dinámicas
+                y conectadas.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2023
+            </span>
+
+            <div class="card">
+
+                La inteligencia artificial generativa
+                comienza a integrarse masivamente en
+                herramientas y aplicaciones web.
+
+                <a
+                    href="https://github.com/features/copilot"
+                    target="_blank"
+                    rel="noopener">
+                    GitHub Copilot
+                </a>
+
+                se convierte en uno de los ejemplos
+                más visibles de esta transformación.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2024
+            </span>
+
+            <div class="card">
+
+                La denominada «UI generativa» comienza
+                a ganar protagonismo.
+
+                Herramientas como
+
+                <a
+                    href="https://www.wix.com/ai-website-builder"
+                    target="_blank"
+                    rel="noopener">
+                    Wix
+                </a>
+
+                incorporan inteligencia artificial
+                al proceso de creación de sitios web.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2025
+            </span>
+
+            <div class="card">
+
+                Las aplicaciones web evolucionan hacia
+                experiencias multimodales capaces de
+                combinar texto, imagen, audio y vídeo.
+
+                La computación en el borde y las arquitecturas
+                serverless continúan ganando relevancia.
+
+            </div>
+
+        </div>
+
+
+        <div class="event reveal">
+
+            <span class="dot"></span>
+
+            <span class="year">
+                2026
+            </span>
+
+            <div class="card">
+
+                <span class="badge-xr">
+                    PRESENTE
+                </span>
+
+                <br>
+
+                Las experiencias
+
+                <a
+                    href="https://immersiveweb.dev"
+                    target="_blank"
+                    rel="noopener">
+                    WebXR
+                </a>
+
+                permiten explorar nuevas formas de
+                interacción desde el navegador.
+
+                La inteligencia artificial se integra
+                progresivamente en la personalización,
+                accesibilidad y funcionalidad de las
+                interfaces.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="examples">
+
+        <h2>
+            Cómo se presenta la Web contemporánea
+        </h2>
+
+
+        <div class="example-grid">
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://immersiveweb.dev"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-vr-cardboard"></i>
+
+                    Experiencias WebXR
+
+                    <span class="creator">
+                        Realidad virtual y aumentada desde el navegador
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.shopify.com/ar"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-shirt"></i>
+
+                    Comercio inmersivo
+
+                    <span class="creator">
+                        Experiencias de compra y realidad aumentada
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            <div class="example-card reveal">
+
+                <a
+                    href="https://www.ibm.com/watson-health"
+                    target="_blank"
+                    rel="noopener">
+
+                    <i class="fa-solid fa-notes-medical"></i>
+
+                    Inteligencia artificial aplicada
+
+                    <span class="creator">
+                        Sistemas capaces de analizar grandes
+                        cantidades de información
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+
+        LA WEB SIGUE EVOLUCIONANDO.
+        <br>
+        Y SU HISTORIA TAMBIÉN LA ESCRIBIMOS NOSOTROS.
+
+    </footer>
+
 </section>
+
+
 
 <!-- ============================================================
-     SOURCES
+     FUENTES
      ============================================================ -->
-<section id="sources" style="font-family:'Inter',sans-serif; background:transparent; color:#e9ecff; padding-top:50px;">
-  <h2 class="reveal">Fuentes y referencias</h2>
-  <ul class="reveal">
-    <li><a href="https://www.w3.org/History.html" target="_blank" rel="noopener">A Little History of the World Wide Web</a> — Tim Berners-Lee, W3C. Relato histórico del nacimiento y primeros años de la web.</li>
-    <li><a href="https://home.cern/science/computing/birth-web" target="_blank" rel="noopener">The birth of the Web</a> — CERN. Documentación oficial del origen de la World Wide Web en el CERN.</li>
-    <li><a href="https://www.oreilly.com/pub/a/web2/archive/what-is-web-20.html" target="_blank" rel="noopener">What Is Web 2.0</a> — Tim O'Reilly. Artículo fundacional que definió la era de la web social.</li>
-    <li><a href="https://en.wikipedia.org/wiki/History_of_the_World_Wide_Web" target="_blank" rel="noopener">History of the World Wide Web</a> — Wikipedia. Panorama enciclopédico con referencias a múltiples fuentes.</li>
-    <li><a href="https://ethereum.org/en/web3/" target="_blank" rel="noopener">What is Web3?</a> — Ethereum Foundation. Explicación del concepto de Web3 y la descentralización.</li>
-    <li><a href="https://web.dev/progressive-web-apps/" target="_blank" rel="noopener">Progressive Web Apps</a> — web.dev (Google). Guía técnica y conceptual sobre PWAs.</li>
-    <li><a href="https://webassembly.org/" target="_blank" rel="noopener">WebAssembly</a> — Sitio oficial. Documentación y especificaciones del estándar WebAssembly.</li>
-    <li><a href="https://www.computerhistory.org/internethistory/" target="_blank" rel="noopener">Internet History</a> — Computer History Museum. Línea de tiempo detallada de Internet y la web.</li>
-  </ul>
+
+<section id="sources">
+
+
+    <h2 class="reveal">
+        Fuentes y referencias
+    </h2>
+
+
+    <ul class="reveal">
+
+
+        <li>
+
+            <a
+                href="https://www.w3.org/History.html"
+                target="_blank"
+                rel="noopener">
+
+                A Little History of the World Wide Web
+
+            </a>
+
+            — W3C.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://www.oreilly.com/pub/a/web2/archive/what-is-web-20.html"
+                target="_blank"
+                rel="noopener">
+
+                What Is Web 2.0
+
+            </a>
+
+            — Tim O'Reilly.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://en.wikipedia.org/wiki/History_of_the_World_Wide_Web"
+                target="_blank"
+                rel="noopener">
+
+                History of the World Wide Web
+
+            </a>
+
+            — Wikipedia.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://ethereum.org/en/web3/"
+                target="_blank"
+                rel="noopener">
+
+                What is Web3?
+
+            </a>
+
+            — Ethereum Foundation.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://web.dev/progressive-web-apps/"
+                target="_blank"
+                rel="noopener">
+
+                Progressive Web Apps
+
+            </a>
+
+            — web.dev.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://webassembly.org/"
+                target="_blank"
+                rel="noopener">
+
+                WebAssembly
+
+            </a>
+
+            — Sitio oficial.
+
+        </li>
+
+
+        <li>
+
+            <a
+                href="https://www.computerhistory.org/internethistory/"
+                target="_blank"
+                rel="noopener">
+
+                Internet History
+
+            </a>
+
+            — Computer History Museum.
+
+        </li>
+
+
+    </ul>
+
 </section>
+
+
 
 <script>
+
 /* ============================================================
-   1. SCROLL PROGRESS BAR
+   PROGRESO DEL SCROLL
    ============================================================ */
-const progressBar = document.getElementById('progress-bar');
+
+const progressBar =
+    document.getElementById("progress-bar");
+
 function updateProgress(){
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-  progressBar.style.width = pct + '%';
+
+    const scrollTop =
+        window.scrollY;
+
+    const documentHeight =
+        document.documentElement.scrollHeight
+        - window.innerHeight;
+
+    const percentage =
+        documentHeight > 0
+        ? (scrollTop / documentHeight) * 100
+        : 0;
+
+    progressBar.style.width =
+        percentage + "%";
 }
-window.addEventListener('scroll', updateProgress, { passive:true });
+
+window.addEventListener(
+    "scroll",
+    updateProgress,
+    {passive:true}
+);
+
 updateProgress();
 
-/* ============================================================
-   2. SCROLL-TRIGGERED REVEAL ANIMATIONS
-   ============================================================ */
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting){
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.15 });
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
 
 /* ============================================================
-   3. ERA NAVIGATOR — highlight current section based on scroll position
-   (fixed: now updates on every scroll event, more precise than IntersectionObserver)
+   REVEAL DE ELEMENTOS
    ============================================================ */
-const navButtons = document.querySelectorAll('#era-nav button');
-const sections = ['web1','web2','web3','web4'].map(id => document.getElementById(id));
+
+const revealObserver =
+    new IntersectionObserver(
+        (entries) => {
+
+            entries.forEach(
+                entry => {
+
+                    if(entry.isIntersecting){
+
+                        entry.target
+                            .classList
+                            .add("visible");
+
+                    }
+
+                }
+            );
+
+        },
+        {
+            threshold:.12
+        }
+    );
+
+
+document
+    .querySelectorAll(".reveal")
+    .forEach(
+        element =>
+            revealObserver.observe(element)
+    );
+
+
+
+/* ============================================================
+   NAVEGACIÓN ENTRE ERAS
+   ============================================================ */
+
+const navButtons =
+    document.querySelectorAll(
+        "#era-nav button"
+    );
+
+const sections = [
+    document.getElementById("web1"),
+    document.getElementById("web2"),
+    document.getElementById("web3"),
+    document.getElementById("web4")
+];
+
 
 function updateActiveNav(){
-  const scrollPosition = window.scrollY + window.innerHeight / 2; // middle of viewport
-  let activeSection = sections[0]; // default to first
-  for (let i = 0; i < sections.length; i++) {
-    const section = sections[i];
-    if (section.offsetTop <= scrollPosition) {
-      activeSection = section;
-    } else {
-      break;
+
+    const position =
+        window.scrollY
+        + window.innerHeight / 2;
+
+    let activeSection =
+        sections[0];
+
+
+    for(
+        let i = 0;
+        i < sections.length;
+        i++
+    ){
+
+        if(
+            sections[i].offsetTop
+            <= position
+        ){
+
+            activeSection =
+                sections[i];
+
+        }else{
+
+            break;
+
+        }
+
     }
-  }
-  const activeId = activeSection.id;
-  navButtons.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.target === activeId);
-  });
+
+
+    navButtons.forEach(button => {
+
+        button.classList.toggle(
+            "active",
+            button.dataset.target
+            === activeSection.id
+        );
+
+    });
+
 }
 
-window.addEventListener('scroll', updateActiveNav, { passive: true });
-updateActiveNav(); // initial call
 
-/* Click to jump */
-navButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = document.getElementById(btn.dataset.target);
-    target.scrollIntoView({ behavior:'smooth' });
-  });
+window.addEventListener(
+    "scroll",
+    updateActiveNav,
+    {passive:true}
+);
+
+updateActiveNav();
+
+
+navButtons.forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            const target =
+                document.getElementById(
+                    button.dataset.target
+                );
+
+            target.scrollIntoView({
+                behavior:"smooth"
+            });
+
+        }
+    );
+
 });
 
+
+
 /* ============================================================
-   4. WEB 4.0 AMBIENT PARTICLES — small drifting light dots
+   PARTÍCULAS DE WEB 4.0
    ============================================================ */
-const particleField = document.getElementById('particles');
-const PARTICLE_COUNT = 40;
-for (let i = 0; i < PARTICLE_COUNT; i++){
-  const p = document.createElement('span');
-  const left = Math.random() * 100;
-  const bottom = Math.random() * 100;
-  const duration = 8 + Math.random() * 14;
-  const delay = Math.random() * 10;
-  const size = 2 + Math.random() * 3;
-  p.style.left = left + '%';
-  p.style.bottom = bottom + '%';
-  p.style.width = size + 'px';
-  p.style.height = size + 'px';
-  p.style.animationDuration = duration + 's';
-  p.style.animationDelay = delay + 's';
-  particleField.appendChild(p);
+
+const particleField =
+    document.getElementById("particles");
+
+const PARTICLE_COUNT = 45;
+
+
+for(
+    let i = 0;
+    i < PARTICLE_COUNT;
+    i++
+){
+
+    const particle =
+        document.createElement("span");
+
+
+    particle.style.left =
+        Math.random() * 100 + "%";
+
+
+    particle.style.bottom =
+        Math.random() * 100 + "%";
+
+
+    const size =
+        2 + Math.random() * 3;
+
+
+    particle.style.width =
+        size + "px";
+
+
+    particle.style.height =
+        size + "px";
+
+
+    particle.style.animationDuration =
+        8 + Math.random() * 14 + "s";
+
+
+    particle.style.animationDelay =
+        Math.random() * 10 + "s";
+
+
+    particleField.appendChild(
+        particle
+    );
+
 }
+
+
+
+/* ============================================================
+   GUESTBOOK — DEMOSTRACIÓN
+   ============================================================ */
+
+const guestbookForm =
+    document.querySelector(
+        ".guestbook-form"
+    );
+
+
+if(guestbookForm){
+
+    guestbookForm.addEventListener(
+        "submit",
+        function(){
+
+            const name =
+                document.getElementById(
+                    "guest-name"
+                ).value.trim();
+
+
+            const message =
+                document.getElementById(
+                    "guest-message"
+                ).value.trim();
+
+
+            if(!name || !message){
+
+                alert(
+                    "Por favor, complete su nombre y mensaje."
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                "Gracias, " +
+                name +
+                ". Su mensaje ha sido recibido."
+            );
+
+        }
+    );
+
+}
+
 </script>
 
 </body>
